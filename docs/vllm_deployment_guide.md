@@ -17,12 +17,13 @@ The MiniMax-M1 model can run efficiently on a single server equipped with 8 H800
 
 ### MiniMax-M1 Model Obtaining
 
-You can download the model from our official HuggingFace repository: [MiniMax-M1](https://huggingface.co/MiniMaxAI/MiniMax-M1-40k)
+You can download the model from our official HuggingFace repository: [MiniMax-M1-40k](https://huggingface.co/MiniMaxAI/MiniMax-M1-40k), [MiniMax-M1-80k](https://huggingface.co/MiniMaxAI/MiniMax-M1-80k)
 
 Download command:
 ```
 pip install -U huggingface-hub
-huggingface-cli download MiniMaxAI/MiniMax-M1
+huggingface-cli download MiniMaxAI/MiniMax-M1-40k
+# huggingface-cli download MiniMaxAI/MiniMax-M1-80k
 
 # If you encounter network issues, you can set a proxy
 export HF_ENDPOINT=https://hf-mirror.com
@@ -33,6 +34,7 @@ Or download using git:
 ```bash
 git lfs install
 git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-40k
+git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-80k
 ```
 
 ⚠️ **Important Note**: Please ensure that [Git LFS](https://git-lfs.github.com/) is installed on your system, which is necessary for completely downloading the model weight files.

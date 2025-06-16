@@ -15,12 +15,13 @@ MiniMax-M1 模型可在单台配备8个H800或8个H20 GPU的服务器上高效�
 
 ### MiniMax-M1 模型获取
 
-您可以从我们的官方 HuggingFace 仓库下载模型：[MiniMax-M1](https://huggingface.co/MiniMaxAI/MiniMax-M1-40k)
+您可以从我们的官方 HuggingFace 仓库下载模型：[MiniMax-M1-40k](https://huggingface.co/MiniMaxAI/MiniMax-M1-40k)、[MiniMax-M1-80k](https://huggingface.co/MiniMaxAI/MiniMax-M1-80k)
 
 下载命令：
 ```
 pip install -U huggingface-hub
-huggingface-cli download MiniMaxAI/MiniMax-M1
+huggingface-cli download MiniMaxAI/MiniMax-M1-40k
+# huggingface-cli download MiniMaxAI/MiniMax-M1-80k
 
 # 如果遇到网络问题，可以设置代理
 export HF_ENDPOINT=https://hf-mirror.com
@@ -31,6 +32,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 ```bash
 git lfs install
 git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-40k
+git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-80k
 ```
 
 ⚠️ **重要提示**：请确保系统已安装 [Git LFS](https://git-lfs.github.com/)，这对于完整下载模型权重文件是必需的。
