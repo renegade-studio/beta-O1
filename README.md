@@ -116,6 +116,8 @@ foundation for next-generation language model agents to reason and tackle real-w
 
 \* conducted on the text-only HLE subset.
 
+Our models are evaluated with temperature=1.0, top_p=0.95. 
+
 ### SWE-bench methodology 
 We report results derived from the Agentless scaffold. Departing from the original pipeline, our methodology employs a two-stage localization process (without any embedding-based retrieval mechanisms): initial coarse-grained file localization followed by fine-grained localization to specific files and code elements. The values for our models are calculated on the subset of n=486 verified tasks which work on our infrastructure. The excluded 14 test cases that were incompatible with our internal infrastructure are:
 "astropy__astropy-7606",
