@@ -116,24 +116,24 @@ foundation for next-generation language model agents to reason and tackle real-w
 
 \* conducted on the text-only HLE subset.
 
-Our models are evaluated with temperature=1.0, top_p=0.95. 
+Our models are evaluated with `temperature=1.0`, `top_p=0.95`. 
 
 ### SWE-bench methodology 
 We report results derived from the Agentless scaffold. Departing from the original pipeline, our methodology employs a two-stage localization process (without any embedding-based retrieval mechanisms): initial coarse-grained file localization followed by fine-grained localization to specific files and code elements. The values for our models are calculated on the subset of n=486 verified tasks which work on our infrastructure. The excluded 14 test cases that were incompatible with our internal infrastructure are:
-"astropy__astropy-7606",
-"astropy__astropy-8707",
-"astropy__astropy-8872",
-"django__django-10097",
-"matplotlib__matplotlib-20488",
-"psf__requests-2317",
-"psf__requests-2931",
-"psf__requests-5414",
-"pylint-dev__pylint-6528",
-"pylint-dev__pylint-7277",
-"sphinx-doc__sphinx-10435",
-"sphinx-doc__sphinx-7985",
-"sphinx-doc__sphinx-8269",
-"sphinx-doc__sphinx-8475"
+`"astropy__astropy-7606"`,
+`"astropy__astropy-8707"`,
+`"astropy__astropy-8872"`,
+`"django__django-10097"`,
+`"matplotlib__matplotlib-20488"`,
+`"psf__requests-2317"`,
+`"psf__requests-2931"`,
+`"psf__requests-5414"`,
+`"pylint-dev__pylint-6528"`,
+`"pylint-dev__pylint-7277"`,
+`"sphinx-doc__sphinx-10435"`,
+`"sphinx-doc__sphinx-7985"`,
+`"sphinx-doc__sphinx-8269"`,
+`"sphinx-doc__sphinx-8475"`
 
 ### TAU-bench methodology 
 We evaluate TAU-Bench with GPT-4.1 as user model and without any custom tools. The maximum number of interaction steps is 40. 
