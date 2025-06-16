@@ -1,3 +1,4 @@
+
 <div align="center">
 
 <svg width="60%" height="auto" viewBox="0 0 144 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -169,4 +170,4 @@ For general use and evaluation, we provide a [Chatbot](https://chat.minimax.io/)
 
 
 ## 6. Contact Us
-Contact us at [model@minimaxi.com](mailto:model@minimaxi.com).
+Contact us at [model@minimax.io](mailto:model@minimax.io).
