@@ -42,7 +42,10 @@ git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-40k
 为确保部署环境的一致性和稳定性，我们推荐使用 Docker 进行部署。
 
 ⚠️ **版本要求**：
-- MiniMax-M1 模型需要 vLLM 0.8.3 或更高版本才能获得完整支持
+- 基础要求：vLLM 版本必须 ≥ 0.8.3，以确保对 MiniMax-M1 模型的完整支持
+- 特殊说明：如果使用 vLLM 0.8.3 至 0.9.2 之间的版本，需要修改模型配置文件：
+  - 打开 `config.json`
+  - 将 `config['architectures'] = ["MiniMaxM1ForCausalLM"]` 修改为 `config['architectures'] = ["MiniMaxText01ForCausalLM"]`
 
 1. 获取容器镜像：
 ```bash
