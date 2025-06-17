@@ -24,9 +24,9 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", trus
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
 
 messages = [
-    {"role": "user", "content": "What is your favourite condiment?"},
-    {"role": "assistant", "content": "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!"},
-    {"role": "user", "content": "Do you have mayonnaise recipes?"}
+    {"role": "user", "content": [{"type": "text", "text": "What is your favourite condiment?"}]},
+    {"role": "assistant", "content": [{"type": "text", "text": "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!"}]},
+    {"role": "user", "content": [{"type": "text", "text": "Do you have mayonnaise recipes?"}]}
 ]
 
 text = tokenizer.apply_chat_template(
@@ -59,7 +59,7 @@ print(response)
 
 上面的代码片段展示了不使用任何优化技巧的推理过程。但通过利用 [Flash Attention](../perf_train_gpu_one#flash-attention-2)，可以大幅加速模型，因为它提供了模型内部使用的注意力机制的更快实现。
 
-首先，确保安装最新版本的 Flash Attention 2 以包含滑动窗口注意力功能：
+首先，确保安装最新版本的 Flash Attention 2：
 
 ```bash
 pip install -U flash-attn --no-build-isolation
