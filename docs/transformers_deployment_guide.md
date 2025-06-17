@@ -26,9 +26,9 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", trus
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
 
 messages = [
-    {"role": "user", "content": "What is your favourite condiment?"},
-    {"role": "assistant", "content": "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!"},
-    {"role": "user", "content": "Do you have mayonnaise recipes?"}
+    {"role": "user", "content": [{"type": "text", "text": "What is your favourite condiment?"}]},
+    {"role": "assistant", "content": [{"type": "text", "text": "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!"}]},
+    {"role": "user", "content": [{"type": "text", "text": "Do you have mayonnaise recipes?"}]}
 ]
 
 text = tokenizer.apply_chat_template(
@@ -61,7 +61,7 @@ print(response)
 
 The code snippet above showcases inference without any optimization tricks. However, one can drastically speed up the model by leveraging [Flash Attention](../perf_train_gpu_one#flash-attention-2), which is a faster implementation of the attention mechanism used inside the model.
 
-First, make sure to install the latest version of Flash Attention 2 to include the sliding window attention feature:
+First, make sure to install the latest version of Flash Attention 2:
 
 ```bash
 pip install -U flash-attn --no-build-isolation
