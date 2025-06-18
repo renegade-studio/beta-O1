@@ -130,7 +130,38 @@ Our general system prompt is:
 - You must adhere to all of the policies. Pay attention to the details in the terms. Solutions for most situations can be found within these policies.
 ``` 
 
-## 3. Deployment Guide
+## 3. Recommendations for Minimax-M1 Model Usage
+
+To achieve the best results with the Minimax-M1 model, we suggest focusing on two key points: Inference Parameters and the System Prompt.
+
+### 3.1. Inference Parameters
+- Temperature: **`1.0`**
+- Top_p: **`0.95`**
+
+This setting is optimal for encouraging creativity and diversity in the model's responses. It allows the model to explore a wider range of linguistic possibilities, preventing outputs that are too rigid or repetitive, while still maintaining strong logical coherence.
+
+### 3.2. System Prompt
+Tailoring your system prompt to the specific task is crucial for guiding the model effectively. Below are suggested settings for different scenarios.
+
+#### A. General-Purpose Scenarios
+For common tasks like summarization, translation, Q&A, or creative writing:
+```
+You are a helpful assistant.
+```
+#### B. Web Development Scenarios
+For complex tasks like generating code for web pages:
+``` 
+You are a web development engineer, writing web pages according to the instructions below. You are a powerful code editing assistant capable of writing code and creating artifacts in conversations with users, or modifying and updating existing artifacts as requested by users. 
+All code is written in a single code block to form a complete code file for display, without separating HTML and JavaScript code. An artifact refers to a runnable complete code snippet, you prefer to integrate and output such complete runnable code rather than breaking it down into several code blocks. For certain types of code, they can render graphical interfaces in a UI window. After generation, please check the code execution again to ensure there are no errors in the output.
+Output only the HTML, without any additional descriptive text. Make the UI looks modern and beautiful.
+```
+#### C. Mathematical Scenarios
+When dealing with problems that require calculation or logical deduction:
+```
+Please reason step by step, and put your final answer within \boxed{}.
+```
+
+## 4. Deployment Guide
 
 Download the model from HuggingFace repository: 
 - [MiniMax-M1-40k](https://huggingface.co/MiniMaxAI/MiniMax-M1-40k)
@@ -146,14 +177,27 @@ For detailed vLLM deployment instructions, please refer to our [vLLM Deployment 
 Alternatively, you can also deploy using Transformers directly. For detailed Transformers deployment instructions, you can see our [MiniMax-M1 Transformers Deployment Guide](./docs/transformers_deployment_guide.md).
 
 
-## 4. Function Calling
+## 5. Function Calling
 
 The MiniMax-M1 model supports function calling capabilities, enabling the model to identify when external functions need to be called and output function call parameters in a structured format. [MiniMax-M1 Function Call Guide](./docs/function_call_guide.md) provides detailed instructions on how to use the function calling feature of MiniMax-M1.
 
 
-## 5. Chatbot & API
+## 6. Chatbot & API
 For general use and evaluation, we provide a [Chatbot](https://chat.minimax.io/) with online search capabilities and the [online API](https://www.minimax.io/platform/) for developers. For general use and evaluation, we provide the [MiniMax MCP Server](https://github.com/MiniMax-AI/MiniMax-MCP) with video generation, image generation, speech synthesis, and voice cloning for developers.
 
 
-## 6. Contact Us
+## 7. Citation
+```
+@misc{minimax2025minimaxm1scalingtesttimecompute,
+      title={MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention}, 
+      author={MiniMax},
+      year={2025},
+      eprint={2506.13585},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2506.13585}, 
+}
+```
+
+## 8. Contact Us
 Contact us at [model@minimax.io](mailto:model@minimax.io).
