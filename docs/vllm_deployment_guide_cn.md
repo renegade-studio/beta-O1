@@ -39,17 +39,18 @@ git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-80k
 
 ## 🛠️ 部署方案
 
-### 方案一：使用 Docker 部署（推荐）
+### 方案：使用 Docker 部署（推荐）
 
 为确保部署环境的一致性和稳定性，我们推荐使用 Docker 进行部署。
 
 ⚠️ **版本要求**：
-- 基础要求：vLLM 版本必须 ≥ 0.8.3，以确保对 MiniMax-M1 模型的完整支持
-- 特殊说明：如果使用 vLLM 0.8.3 至 0.9.2 之间的版本，需要修改模型配置文件：
-  - 打开 `config.json`
-  - 将 `config['architectures'] = ["MiniMaxM1ForCausalLM"]` 修改为 `config['architectures'] = ["MiniMaxText01ForCausalLM"]`
+- 基础要求：vLLM 版本必须 ≥ 0.9.2，以确保对 MiniMax-M1 模型的完整支持
+- 特殊说明：如果使用低于 0.9.2 的 vLLM 版本，会遇见无法支持该模型或者精度不正确的情况：
+  - 详情见：[Fix minimax model cache & lm_head precision #19592](https://github.com/vllm-project/vllm/pull/19592)
 
 1. 获取容器镜像：
+
+目前 vLLM 官方还未推出v0.9.2版本 docker，我们以 v0.8.3 为例子进行手动编译 vLLM：
 ```bash
 docker pull vllm/vllm-openai:v0.8.3
 ```
@@ -72,21 +73,12 @@ sudo docker run -it \
     --name $NAME \
     $DOCKER_RUN_CMD \
     $IMAGE /bin/bash
-```
 
-
-### 方案二：直接安装 vLLM
-
-如果您的环境满足以下要求：
-
-- CUDA 12.1
-- PyTorch 2.1
-
-可以直接安装 vLLM
-
-安装命令：
-```bash
-pip install vllm
+# 编译 vLLM
+cd $CODE_DIR
+git clone https://github.com/vllm-project/vllm.git
+cd vllm
+pip install -e .
 ```
 
 💡 如果您使用其他环境配置，请参考 [vLLM 安装指南](https://docs.vllm.ai/en/latest/getting_started/installation.html)
