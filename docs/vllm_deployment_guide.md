@@ -46,15 +46,14 @@ git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-80k
 To ensure consistency and stability of the deployment environment, we recommend using Docker for deployment.
 
 ⚠️ **Version Requirements**: 
-- MiniMax-M1 model requires vLLM version 0.8.3 or later for full support
-- If you are using a Docker image with vLLM version lower than the required version, you will need to:
-  1. Update to the latest vLLM code
-  2. Recompile vLLM from source. Follow the compilation instructions in Solution 2 of the Common Issues section
-- Special Note: For vLLM versions between 0.8.3 and 0.9.2, you need to modify the model configuration:
-  1. Open `config.json`
-  2. Change `config['architectures'] = ["MiniMaxM1ForCausalLM"]` to `config['architectures'] = ["MiniMaxText01ForCausalLM"]`
+- MiniMax-M1 model requires vLLM version 0.9.2 or later for full support
+- Special Note: Using vLLM versions below 0.9.2 may result in incompatibility or incorrect precision for the model:
+  - For details, see: [Fix minimax model cache & lm_head precision #19592](https://github.com/vllm-project/vllm/pull/19592)
 
 1. Get the container image:
+
+Currently, the official vLLM Docker image for version v0.9.2 has not been released yet.
+As an example, we will demonstrate how to manually build vLLM using version v0.8.3.
 ```bash
 docker pull vllm/vllm-openai:v0.8.3
 ```
@@ -77,21 +76,12 @@ sudo docker run -it \
     --name $NAME \
     $DOCKER_RUN_CMD \
     $IMAGE /bin/bash
-```
 
-
-### Option 2: Direct Installation of vLLM
-
-If your environment meets the following requirements:
-
-- CUDA 12.1
-- PyTorch 2.1
-
-You can directly install vLLM
-
-Installation command:
-```bash
-pip install vllm
+# install vLLM
+cd $CODE_DIR
+git clone https://github.com/vllm-project/vllm.git
+cd vllm
+pip install -e .
 ```
 
 💡 If you are using other environment configurations, please refer to the [vLLM Installation Guide](https://docs.vllm.ai/en/latest/getting_started/installation.html)
