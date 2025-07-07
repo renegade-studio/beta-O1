@@ -8,9 +8,122 @@ O modelo MiniMax-M1 possui suporte para chamadas de funções (Function Call), p
 
 ## 🚀 Início Rápido
 
-### Usando o Template de Chat
+### Usando vLLM para Function Calls (Recomendado)
 
-O MiniMax-M1 utiliza um template específico de chat para lidar com chamadas de funções. Este template é definido no arquivo `tokenizer_config.json` e pode ser utilizado no seu código através do template.
+Na implantação real, para suportar capacidades nativas de Function Calling (chamada de ferramentas) semelhantes à API OpenAI, o modelo MiniMax-M1 integra um parser dedicado `tool_call_parser=minimax`, evitando análise regex adicional da saída do modelo.
+
+#### Configuração do Ambiente e Recompilação do vLLM
+
+Como este recurso ainda não foi oficialmente lançado na versão PyPI, é necessária compilação a partir do código fonte. O seguinte é um processo de exemplo baseado na imagem oficial do Docker vLLM `vllm/vllm-openai:v0.8.3`:
+
+```bash
+IMAGE=vllm/vllm-openai:v0.8.3
+DOCKER_RUN_CMD="--network=host --privileged --ipc=host --ulimit memlock=-1 --shm-size=32gb --rm --gpus all --ulimit stack=67108864"
+
+# Executar docker
+sudo docker run -it -v $MODEL_DIR:$MODEL_DIR \
+                    -v $CODE_DIR:$CODE_DIR \
+                    --name vllm_function_call \
+                    $DOCKER_RUN_CMD \
+                    --entrypoint /bin/bash \
+                    $IMAGE
+```
+
+#### Compilando o Código Fonte do vLLM
+
+Após entrar no container, execute os seguintes comandos para obter o código fonte e reinstalar:
+
+```bash
+cd $CODE_DIR
+git clone https://github.com/vllm-project/vllm.git
+cd vllm
+pip install -e .
+```
+
+#### Iniciando o Serviço API vLLM
+
+```bash
+export SAFETENSORS_FAST_GPU=1
+export VLLM_USE_V1=0
+
+python3 -m vllm.entrypoints.openai.api_server \
+--model MiniMax-M1-80k \
+--tensor-parallel-size 8 \
+--trust-remote-code \
+--quantization experts_int8  \
+--enable-auto-tool-choice \
+--tool-call-parser minimax \
+--chat-template vllm/examples/tool_chat_template_minimax_m1.jinja \
+--max_model_len 4096 \
+--dtype bfloat16 \
+--gpu-memory-utilization 0.85
+```
+
+**⚠️ Nota:**
+- `--tool-call-parser minimax` é um parâmetro chave para habilitar o parser personalizado MiniMax-M1
+- `--enable-auto-tool-choice` habilita a seleção automática de ferramentas
+- `--chat-template` arquivo de template precisa ser adaptado para o formato de chamada de ferramentas
+
+#### Exemplo de Script de Teste de Function Call
+
+O seguinte script Python implementa um exemplo de chamada de função de consulta meteorológica baseado no SDK OpenAI:
+
+```python
+from openai import OpenAI
+import json
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="dummy")
+
+def get_weather(location: str, unit: str):
+    return f"Getting the weather for {location} in {unit}..."
+
+tool_functions = {"get_weather": get_weather}
+
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "City and state, e.g., 'San Francisco, CA'"},
+                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+            },
+            "required": ["location", "unit"]
+        }
+    }
+}]
+
+response = client.chat.completions.create(
+    model=client.models.list().data[0].id,
+    messages=[{"role": "user", "content": "What's the weather like in San Francisco? use celsius."}],
+    tools=tools,
+    tool_choice="auto"
+)
+
+print(response)
+
+tool_call = response.choices[0].message.tool_calls[0].function
+print(f"Function called: {tool_call.name}")
+print(f"Arguments: {tool_call.arguments}")
+print(f"Result: {get_weather(**json.loads(tool_call.arguments))}")
+```
+
+**Exemplo de Saída:**
+```
+Function called: get_weather
+Arguments: {"location": "San Francisco, CA", "unit": "celsius"}
+Result: Getting the weather for San Francisco, CA in celsius...
+```
+
+### Análise Manual da Saída do Modelo
+
+Se você não puder usar o parser integrado do vLLM, ou precisar usar outros frameworks de inferência (como transformers, TGI, etc.), você pode usar o seguinte método para analisar manualmente a saída bruta do modelo. Este método requer que você analise o formato de tags XML da saída do modelo.
+
+#### Exemplo Usando Transformers
+
+O seguinte é um exemplo completo usando a biblioteca transformers:
 
 ```python
 from transformers import AutoTokenizer
@@ -18,25 +131,23 @@ from transformers import AutoTokenizer
 def get_default_tools():
     return [
         {
-          {
-            "name": "get_current_weather",
-            "description": "Get the latest weather for a location",
-            "parameters": {
-                "type": "object", 
-                "properties": {
-                    "location": {
-                        "type": "string", 
-                        "description": "A certain city, such as Beijing, Shanghai"
-                    }
-                }, 
-            }
-            "required": ["location"],
-            "type": "object"
+          "name": "get_current_weather",
+          "description": "Get the latest weather for a location",
+          "parameters": {
+              "type": "object", 
+              "properties": {
+                  "location": {
+                      "type": "string", 
+                      "description": "A certain city, such as Beijing, Shanghai"
+                  }
+              }, 
           }
+          "required": ["location"],
+          "type": "object"
         }
     ]
 
-# Modelo de carga e tokenizador
+# Carregar modelo e tokenizador
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 prompt = "What's the weather like in Shanghai today?"
 messages = [
@@ -47,13 +158,34 @@ messages = [
 # Habilitar ferramentas de chamada de função
 tools = get_default_tools()
 
-# Aplicar modelo de bate-papo e adicionar definições de ferramentas
+# Aplicar template de chat e adicionar definições de ferramentas
 text = tokenizer.apply_chat_template(
     messages,
     tokenize=False,
     add_generation_prompt=True,
     tools=tools
 )
+
+# Enviar requisição (usando qualquer serviço de inferência aqui)
+import requests
+payload = {
+    "model": "MiniMaxAI/MiniMax-M1-40k",
+    "prompt": text,
+    "max_tokens": 4000
+}
+response = requests.post(
+    "http://localhost:8000/v1/completions",
+    headers={"Content-Type": "application/json"},
+    json=payload,
+    stream=False,
+)
+
+# Saída do modelo precisa de análise manual
+raw_output = response.json()["choices"][0]["text"]
+print("Saída bruta:", raw_output)
+
+# Use a função de análise abaixo para processar a saída
+function_calls = parse_function_calls(raw_output)
 ```
 
 ## 🛠️ Definição de Function Call
@@ -67,16 +199,16 @@ As funções precisam ser definidas no campo `tools` do corpo da requisição. C
   "tools": [
     {
       "name": "search_web",
-      "description": "Search function.",
+      "description": "Função de busca.",
       "parameters": {
         "properties": {
           "query_list": {
-            "description": "Keywords for search, with list element count of 1.",
+            "description": "Palavras-chave para busca, com contagem de elementos da lista de 1.",
             "items": { "type": "string" },
             "type": "array"
           },
           "query_tag": {
-            "description": "Classification of the query",
+            "description": "Classificação da consulta",
             "items": { "type": "string" },
             "type": "array"
           }
@@ -95,31 +227,30 @@ As funções precisam ser definidas no campo `tools` do corpo da requisição. C
 * `description`: Descrição da função
 * `parameters`: Definição dos parâmetros da função
 
-  * `properties`: Definições dos parâmetros, onde a chave é o nome do parâmetro e o valor contém a descrição
+  * `properties`: Definições dos parâmetros, onde a chave é o nome do parâmetro e o valor contém a descrição detalhada do parâmetro
   * `required`: Lista de parâmetros obrigatórios
-  * `type`: Tipo de dado (geralmente "object")
+  * `type`: Tipo de parâmetro (geralmente "object")
 
-### Formato Interno de Processamento do Modelo
+### Formato de Processamento Interno do Modelo
 
-Internamente, as definições de funções são convertidas para um formato especial e concatenadas ao texto de entrada:
+Quando processadas internamente pelo modelo, as definições de função são convertidas para um formato especial e concatenadas ao texto de entrada:
 
 ```
-]~!b[]~b]system ai_setting=MiniMax AI
-MiniMax AI is an AI assistant independently developed by MiniMax. [e~[
-]~b]system tool_setting=tools
+<begin_of_document><beginning_of_sentence>system ai_setting=MiniMax AI
+MiniMax AI是由上海稀宇科技有限公司（MiniMax）自主研发的AI助理。<end_of_sentence>
+<beginning_of_sentence>system tool_setting=tools
 You are provided with these tools:
 <tools>
-{"name": "search_web", "description": "Search function.", "parameters": {"properties": {"query_list": {"description": "Keywords for search, with list element count of 1.", "items": {"type": "string"}, "type": "array"}, "query_tag": {"description": "Classification of the query", "items": {"type": "string"}, "type": "array"}}, "required": ["query_list", "query_tag"], "type": "object"}}
+{"name": "search_web", "description": "搜索函数。", "parameters": {"properties": {"query_list": {"description": "进行搜索的关键词，列表元素个数为1。", "items": {"type": "string"}, "type": "array"}, "query_tag": {"description": "query的分类", "items": {"type": "string"}, "type": "array"}}, "required": ["query_list", "query_tag"], "type": "object"}}
 </tools>
-
 If you need to call tools, please respond with <tool_calls></tool_calls> XML tags, and provide tool-name and json-object of arguments, following the format below:
 <tool_calls>
 {"name": <tool-name>, "arguments": <args-json-object>}
 ...
-</tool_calls>[e~[
-]~b]user name=User
-When were the most recent launch events for OpenAI and Gemini?[e~[
-]~b]ai name=MiniMax AI
+</tool_calls><end_of_sentence>
+<beginning_of_sentence>user name=用户
+OpenAI 和 Gemini 的最近一次发布会都是什么时候?<end_of_sentence>
+<beginning_of_sentence>ai name=MiniMax AI
 ```
 
 ### Formato de Saída do Modelo
@@ -136,19 +267,18 @@ Ok, vou procurar a versão mais recente do OpenAI e do Gemini.
 </tool_calls>
 ```
 
-## 📥 Processamento dos Resultados da Function Call
+## 📥 Análise Manual dos Resultados de Function Call
 
 ### Fazendo o Parse das Chamadas de Função
 
-Você pode utilizar o código abaixo para extrair as chamadas de função a partir da saída do modelo:
+Quando a análise manual é necessária, você precisa analisar o formato de tags XML da saída do modelo:
 
 ```python
 import re
 import json
-
 def parse_function_calls(content: str):
     """
-    Parse function calls from model output
+    Analisar chamadas de função da saída do modelo
     """
     function_calls = []
     
@@ -168,7 +298,7 @@ def parse_function_calls(content: str):
             continue
             
         try:
-            # Chamada de função de formato JSON de análise
+            # Analisar chamada de função em formato JSON
             call_data = json.loads(line)
             function_name = call_data.get("name")
             arguments = call_data.get("arguments", {})
@@ -178,95 +308,119 @@ def parse_function_calls(content: str):
                 "arguments": arguments
             })
             
-            print(f"Function call: {function_name}, Arguments: {arguments}")
+            print(f"Chamada de função: {function_name}, Argumentos: {arguments}")
             
         except json.JSONDecodeError as e:
-            print(f"Parameter parsing failed: {line}, Error: {e}")
+            print(f"Falha na análise de parâmetros: {line}, Erro: {e}")
     
     return function_calls
 
 # Exemplo: Manipular função de consulta de clima
 def execute_function_call(function_name: str, arguments: dict):
     """
-    Execute function call and return result
+    Executar chamada de função e retornar resultado
     """
     if function_name == "get_current_weather":
-        location = arguments.get("location", "Unknown location")
-        # Resultado da execução da função de construção
+        location = arguments.get("location", "Localização desconhecida")
+        # Construir resultado da execução da função
         return {
             "role": "tool", 
-            "name": function_name, 
-            "content": json.dumps({
-                "location": location, 
-                "temperature": "25", 
-                "unit": "celsius", 
-                "weather": "Sunny"
-            }, ensure_ascii=False)
-        }
+            "content": [
+              {
+                "name": function_name,
+                "type": "text",
+                "text": json.dumps({
+                    "location": location, 
+                    "temperature": "25", 
+                    "unit": "celsius", 
+                    "weather": "Ensolarado"
+                }, ensure_ascii=False)
+              }
+            ] 
+          }
     elif function_name == "search_web":
         query_list = arguments.get("query_list", [])
         query_tag = arguments.get("query_tag", [])
         # Simular resultados de pesquisa
         return {
             "role": "tool",
-            "name": function_name,
-            "content": f"Search keywords: {query_list}, Categories: {query_tag}\nSearch results: Relevant information found"
-        }
+            "content": [
+              {
+                "name": function_name,
+                "type": "text",
+                "text": f"Palavras-chave de busca: {query_list}, Categorias: {query_tag}\nResultados da busca: Informações relevantes encontradas"
+              }
+            ]
+          }
     
     return None
 ```
 
-### Retornando os Resultados das Funções para o Modelo
+### Retornando os Resultados da Execução de Função para o Modelo
 
-Após interpretar e executar as funções, você deve adicionar os resultados na sequência de mensagens, para que o modelo os utilize nas respostas seguintes.
+Após analisar com sucesso as chamadas de função, você deve adicionar os resultados da execução da função ao histórico da conversa para que o modelo possa acessar e utilizar essas informações em interações subsequentes.
 
 #### Resultado Único
 
-Se o modelo solicitar a função `search_web`, retorne no seguinte formato, com o campo `name` igual ao nome da ferramenta:
+Se o modelo chamar a função `search_web`, você pode se referir ao seguinte formato para adicionar resultados de execução, com o campo `name` sendo o nome específico da função.
 
 ```json
 {
-  "data": [
-     {
-       "role": "tool", 
-       "name": "search_web", 
-       "content": "search_result"
-     }
+  "role": "tool", 
+  "content": [
+    {
+      "name": "search_web",
+      "type": "text",
+      "text": "test_result"
+    }
   ]
 }
 ```
 
-Formato correspondente no input do modelo:
-
+Formato de entrada correspondente do modelo:
 ```
-]~b]tool name=search_web
-search_result[e~[
+<beginning_of_sentence>tool name=tools
+tool name: search_web
+tool result: test_result
+<end_of_sentence>
 ```
 
 #### Vários Resultados
 
-Se o modelo solicitar simultaneamente `search_web` e `get_current_weather`, envie da seguinte forma, usando `name` como "tools" e colocando todos os resultados no campo `content`:
+Se o modelo chamar simultaneamente as funções `search_web` e `get_current_weather`, você pode se referir ao seguinte formato para adicionar resultados de execução, com `content` contendo vários resultados.
 
 ```json
 {
-  "data": [
-     {
-       "role": "tool", 
-       "name": "tools", 
-       "content": "Tool name: search_web\nTool result: test_result1\n\nTool name: get_current_weather\nTool result: test_result2"
-     }
+  "role": "tool", 
+  "content": [
+    {
+      "name": "search_web",
+      "type": "text",
+      "text": "test_result1"
+    },
+    {
+      "name": "get_current_weather",
+      "type": "text",
+      "text": "test_result2"
+    }
   ]
 }
 ```
 
-Formato correspondente no input do modelo:
+Formato de entrada correspondente do modelo:
 ```
-]~b]tool name=tools
-Tool name: search_web
-Tool result: resultado1
-
-Tool name: get_current_weather
-Tool result: resultado2[e~[
+<beginning_of_sentence>tool name=tools
+tool name: search_web
+tool result: test_result1
+tool name: get_current_weather
+tool result: test_result2<end_of_sentence>
 ```
 
-Embora esse seja o formato recomendado, desde que a entrada seja clara para o modelo, os valores de `name` e `content` podem ser adaptados conforme a necessidade.
+Embora recomendemos seguir os formatos acima, desde que a entrada retornada ao modelo seja fácil de entender, o conteúdo específico de `name` e `text` é inteiramente de sua escolha.
+
+## 📚 Referências
+
+- [Repositório do Modelo MiniMax-M1](https://github.com/MiniMaxAI/MiniMax-M1)
+- [Página Principal do Projeto vLLM](https://github.com/vllm-project/vllm)
+- [PR de Function Calling do vLLM](https://github.com/vllm-project/vllm/pull/20297)
+- [SDK Python OpenAI](https://github.com/openai/openai-python)
