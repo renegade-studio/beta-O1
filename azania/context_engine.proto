@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "main";
+
+// The context engine service definition.
+service ContextEngine {
+  // Processes a text and returns the processed text.
+  rpc ProcessText(ProcessTextRequest) returns (ProcessTextResponse) {}
+}
+
+// The request message containing the text to be processed.
+message ProcessTextRequest {
+  string text = 1;
+}
+
+// The response message containing the processed text.
+message ProcessTextResponse {
+  string processed_text = 1;
+}
