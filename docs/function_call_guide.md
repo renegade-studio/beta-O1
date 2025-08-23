@@ -134,16 +134,15 @@ def get_default_tools():
           "name": "get_current_weather",
           "description": "Get the latest weather for a location",
           "parameters": {
-              "type": "object", 
+              "type": "object",
               "properties": {
                   "location": {
-                      "type": "string", 
+                      "type": "string",
                       "description": "A certain city, such as Beijing, Shanghai"
                   }
-              }, 
+              },
+              "required": ["location"]
           }
-          "required": ["location"],
-          "type": "object"
         }
     ]
 
@@ -420,5 +419,5 @@ While we recommend following the above formats, as long as the input returned to
 
 - [MiniMax-M1 Model Repository](https://github.com/MiniMaxAI/MiniMax-M1)
 - [vLLM Project Homepage](https://github.com/vllm-project/vllm)
-- [vLLM Function Calling PR](https://github.com/vllm-project/vllm/pull/20297)
+- [vLLM Tool Calling Documentation](https://docs.vllm.ai/en/stable/features/tool_calling.html)
 - [OpenAI Python SDK](https://github.com/openai/openai-python)

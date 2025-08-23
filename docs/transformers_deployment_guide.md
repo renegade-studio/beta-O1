@@ -59,7 +59,7 @@ print(response)
 
 ### Speeding up with Flash Attention
 
-The code snippet above showcases inference without any optimization tricks. However, one can drastically speed up the model by leveraging [Flash Attention](../perf_train_gpu_one#flash-attention-2), which is a faster implementation of the attention mechanism used inside the model.
+The code snippet above showcases inference without any optimization tricks. However, one can drastically speed up the model by leveraging Flash Attention, which is a faster implementation of the attention mechanism used inside the model.
 
 First, make sure to install the latest version of Flash Attention 2:
 

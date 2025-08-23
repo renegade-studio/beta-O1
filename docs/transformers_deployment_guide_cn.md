@@ -57,7 +57,7 @@ print(response)
 
 ### 使用 Flash Attention 加速
 
-上面的代码片段展示了不使用任何优化技巧的推理过程。但通过利用 [Flash Attention](../perf_train_gpu_one#flash-attention-2)，可以大幅加速模型，因为它提供了模型内部使用的注意力机制的更快实现。
+上面的代码片段展示了不使用任何优化技巧的推理过程。但通过利用 Flash Attention，可以大幅加速模型，因为它提供了模型内部使用的注意力机制的更快实现。
 
 首先，确保安装最新版本的 Flash Attention 2：
 

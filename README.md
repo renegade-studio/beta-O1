@@ -44,6 +44,17 @@
 
 # MiniMax-M1
 
+## Table of Contents
+- [1. Model Overview](#1-model-overview)
+- [2. Evaluation](#2-evaluation)
+- [3. Recommendations for Minimax-M1 Model Usage](#3-recommendations-for-minimax-m1-model-usage)
+- [4. Deployment Guide](#4-deployment-guide)
+- [5. Function Calling](#5-function-calling)
+- [6. Chatbot & API](#6-chatbot--api)
+- [7. Citation](#7-citation)
+- [8. Contact Us](#8-contact-us)
+- [9. Project Azania: The Next Generation](#9-project-azania-the-next-generation)
+
 ## 1. Model Overview 
 
 We introduce MiniMax-M1, the world's first open-weight, large-scale hybrid-attention reasoning model.
@@ -201,3 +212,25 @@ For general use and evaluation, we provide a [Chatbot](https://chat.minimax.io/)
 
 ## 8. Contact Us
 Contact us at [model@minimax.io](mailto:model@minimax.io).
+
+## 9. Project Azania: The Next Generation
+
+We are building Azania, a next-generation context engineering model designed for power, flexibility, and intelligence. This project is a complete rewrite of the agent framework, embracing a modern, microservices-based architecture.
+
+### Core Technologies
+
+Azania is being built with a powerful stack of modern technologies:
+
+*   **Go:** For building high-performance, concurrent services.
+*   **gRPC & Protobuf:** For efficient and strongly-typed inter-service communication.
+*   **CUE:** For robust and scalable configuration and data validation. We are exploring a novel templating system using `dan.tmpl(Modelfile)` for input and HOCON for output.
+*   **TensorFlow:** To integrate cutting-edge RAG (Retrieval-Augmented Generation) capabilities for deep reasoning and knowledge retrieval.
+*   **PocketBase & DuckDB:** For flexible and efficient data storage, using Avro schemas defined in CUE.
+
+### Vision
+
+The vision for Azania is to create a new world of AI agents – a "champion of the new world." It will be a highly capable and adaptable framework for building and deploying sophisticated AI agents with advanced tool-using capabilities.
+
+### Current Status
+
+The project is in its early stages. The foundational gRPC service has been laid out in the `feature/azania-grpc-foundation` branch. We are actively working on building out the core components and welcome collaboration.

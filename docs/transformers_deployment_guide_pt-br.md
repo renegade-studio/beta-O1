@@ -59,7 +59,7 @@ print(response)
 
 ### Acelerando com Flash Attention
 
-O exemplo acima mostra uma inferência sem nenhum tipo de otimização. No entanto, é possível acelerar significativamente o modelo utilizando [Flash Attention](../perf_train_gpu_one#flash-attention-2), que é uma implementação mais rápida do mecanismo de atenção usado no modelo.
+O exemplo acima mostra uma inferência sem nenhum tipo de otimização. No entanto, é possível acelerar significativamente o modelo utilizando Flash Attention, que é uma implementação mais rápida do mecanismo de atenção usado no modelo.
 
 Primeiro, certifique-se de instalar a versão mais recente do Flash Attention 2:
 

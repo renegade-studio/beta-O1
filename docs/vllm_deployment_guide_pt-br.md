@@ -50,9 +50,9 @@ Para garantir consistência e estabilidade no ambiente de deployment, recomendam
 ⚠️ **Requisitos de Versão**:
 
 * O modelo MiniMax-M1 requer vLLM na versão 0.9.2 ou superior para suporte completo.
-* Nota especial: Si se utiliza una versión de vLLM inferior a 0.9.2, pueden surgir problemas de incompatibilidad o precisión incorrecta del modelo:
+* Nota especial: Se for utilizada uma versão do vLLM inferior à 0.9.2, podem surgir problemas de incompatibilidade ou de precisão incorreta do modelo:
 
-  * Para más detalles, consulta: [Fix minimax model cache & lm_head precision #19592](https://github.com/vllm-project/vllm/pull/19592)
+  * Para mais detalhes, veja as [Notas de Lançamento do vLLM v0.9.2](https://sourceforge.net/projects/vllm.mirror/files/v0.9.2/).
 
 1. Obtenha a imagem do container:
 
