@@ -46,7 +46,7 @@ git clone https://huggingface.co/MiniMaxAI/MiniMax-M1-80k
 ⚠️ **版本要求**：
 - 基础要求：vLLM 版本必须 ≥ 0.9.2，以确保对 MiniMax-M1 模型的完整支持
 - 特殊说明：如果使用低于 0.9.2 的 vLLM 版本，会遇见无法支持该模型或者精度不正确的情况：
-  - 详情见：[Fix minimax model cache & lm_head precision #19592](https://github.com/vllm-project/vllm/pull/19592)
+  - 详情见：[vLLM v0.9.2 发行说明](https://sourceforge.net/projects/vllm.mirror/files/v0.9.2/)
 
 1. 获取容器镜像：
 
