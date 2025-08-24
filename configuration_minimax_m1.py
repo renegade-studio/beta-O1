@@ -143,6 +143,10 @@ class MiniMaxM1Config(PretrainedConfig):
         self.output_router_logits = output_router_logits
         self.router_aux_loss_coef = router_aux_loss_coef
         self.router_jitter_noise = router_jitter_noise
+        self.use_triton = kwargs.pop("use_triton", False)
+        self.debug = kwargs.pop("debug", False)
+        self.do_eval = kwargs.pop("do_eval", False)
+        self.eval_and_not_generate = kwargs.pop("eval_and_not_generate", False)
         super().__init__(
             pad_token_id=pad_token_id,
             bos_token_id=bos_token_id,
